@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -13,6 +13,7 @@ ADDRESS = "localhost"
 PORT = 8080
 
 PROJECT_URL = "https://api.modrinth.com/v2/project/%s"
+MODRINTH_HEADERS = {"User-Agent": "5Avian/mcmodbadges"}
 FABRIC_WHITE = (246, 246, 246, 255)
 FABRIC_BROWN = (56, 52, 42, 255)
 
@@ -92,11 +93,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             top_centered = "top_centered" in params
             bot_centered = "bot_centered" in params
 
-            with urlopen(PROJECT_URL % mod_id) as res:
+            with urlopen(Request(PROJECT_URL % mod_id, headers=MODRINTH_HEADERS)) as res:
                 project = json.load(res)
             if bot_text == None:
                 bot_text = project["title"]
-            with urlopen(project["icon_url"]) as res:
+            with urlopen(Request(project["icon_url"], headers=MODRINTH_HEADERS)) as res:
                 icon = Image.open(res)
             icon = icon.resize((128, 128), Image.Resampling.NEAREST).convert("RGBA")
 
